@@ -67,42 +67,50 @@ class ComplexGrapherTests(unittest.TestCase):
 
     def test_figure_1(self):
         cg = grapher.ComplexGrapher()
-        cg.add_point(complex(2, -1), label=True)
+        cg.add_point(complex(2, 1), label=True)
         cg.add_point(complex(-3, 2), label=True)
         png = cg.save_as_png("figure_1_two_labeled_points")
         verify(str(hash(png)), self.reporter)
 
     def test_figure_2(self):
         cg = grapher.ComplexGrapher()
-        cg.add_point(complex(2, -1), label=True)
-        cg.add_point(complex(-3, 2), label=True)
-        cg.add_point(complex(-1, 1), label=True)
-        cg.add_arrow(complex(0, 0), complex(2, -1))
-        cg.add_arrow(complex(-3, 2), complex(-1, 1))
+        z0 = complex(2, 1)
+        z1 = complex(-3, 2)
+        cg.add_point(z0, label=True)
+        cg.add_point(z1, label=True)
+        cg.add_point(z0 + z1, label=True, color='r')
+        cg.add_arrow(complex(0, 0), z1)
+        cg.add_arrow(z0, z0 + z1)
         png = cg.save_as_png("figure_2_two_points_and_their_sum")
         verify(str(hash(png)), self.reporter)
 
     def test_figure_3(self):
         cg = grapher.ComplexGrapher()
-        cg.add_point(complex(2, -1), label=True)
-        cg.add_point(complex(-3, 2), label=True)
-        cg.add_point(complex(-4, 7), label=True)
+        z0 = complex(2, 1)
+        z1 = complex(-3, 2)
+        cg.add_point(z0, label=True)
+        cg.add_point(z1, label=True)
+        cg.add_point(z0*z1, label=True, color='r')
         png = cg.save_as_png("figure_3_two_points_and_their_product")
         verify(str(hash(png)), self.reporter)
 
     def test_figure_4(self):
         cg = grapher.ComplexGrapher()
-        cg.add_point(complex(0, 2), label=True)
-        cg.add_point(complex(-3, 2), label=True)
-        cg.add_point(complex(-4, -6), label=True)
+        z0 = complex(0, 2)
+        z1 = complex(-3, 2)
+        cg.add_point(z0, label=True)
+        cg.add_point(z1, label=True)
+        cg.add_point(z0*z1, label=True, color='r')
         png = cg.save_as_png("figure_4_multiplication_by_pure_imaginary")
         verify(str(hash(png)), self.reporter)
 
     def test_figure_5(self):
         cg = grapher.ComplexGrapher()
-        cg.add_point(complex(0, -2), label=True)
-        cg.add_point(complex(-3, 2), label=True)
-        cg.add_point(complex(4, 6), label=True)
+        z0 = complex(0, -2)
+        z1 = complex(-3, 2)
+        cg.add_point(z0, label=True)
+        cg.add_point(z1, label=True)
+        cg.add_point(z0*z1, label=True, color='r')
         png = cg.save_as_png("figure_5_multiplication_by_pure_negative_imaginary")
         verify(str(hash(png)), self.reporter)
 
@@ -120,6 +128,6 @@ class ComplexGrapherTests(unittest.TestCase):
 
     def test_illustrate_multiplication(self):
         cg = grapher.ComplexGrapher()
-        cg.illustrate_multiplication(complex(2, -1), complex(-3, 2))
+        cg.illustrate_multiplication(complex(2, 1), complex(-3, 2))
         png = cg.save_as_png("test_illustrates_multiplication")
         verify(str(hash(png)), self.reporter)
