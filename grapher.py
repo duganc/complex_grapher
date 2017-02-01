@@ -5,9 +5,7 @@ import math
 
 class ComplexGrapher:
 
-    def __init__(self, show_unit_circle = False):
-        assert type(show_unit_circle) == bool
-        self.show_unit_circle = show_unit_circle
+    def __init__(self):
 
         self.xmin = -10
         self.xmax = 10
@@ -17,6 +15,7 @@ class ComplexGrapher:
         self.real_coords = list()
         self.imag_coords = list()
         self.labels = list()
+        self.impute_sqrts = list()
         self.triangles = list()
         self.point_arrows = list()
         self.arc_arrows = list()
@@ -25,10 +24,13 @@ class ComplexGrapher:
         self.arrows = list()
         self.arrow_colors = list()
 
+        self.circles = list()
 
-    def add_point(self, z, label = False, triangle = False, arrow = False, arc_angle = False, color = 'b'):
+
+    def add_point(self, z, label = False, impute_sqrt_label = False, triangle = False, arrow = False, arc_angle = False, color = 'b'):
         assert type(z) == complex
         assert type(label) == bool
+        assert type(impute_sqrt_label) == bool
         assert type(triangle) == bool
         assert type(arrow) == bool
         assert type(arc_angle) == bool
@@ -37,6 +39,7 @@ class ComplexGrapher:
         self.real_coords.append(z.real)
         self.imag_coords.append(z.imag)
         self.labels.append(label)
+        self.impute_sqrts.append(impute_sqrt_label)
         self.triangles.append(triangle)
         self.point_arrows.append(arrow)
         self.arc_arrows.append(arc_angle)
@@ -50,13 +53,23 @@ class ComplexGrapher:
         self.arrows.append([[start.real, start.imag], [end.real, end.imag]])
         self.arrow_colors.append(color)
 
-    def illustrate_multiplication(self, c1, c2):
+    def add_circle(self, radius, center):
+        if type(radius) == int:
+            radius = float(radius)
+        assert type(radius) == float
+        assert type(center) == complex
+        assert radius > 0
+
+        self.circles.append([radius, [center.real, center.imag]])
+
+    def illustrate_multiplication(self, c1, c2, impute_sqrt_labels = False):
         assert type(c1) == complex
         assert type(c2) == complex
+        assert type(impute_sqrt_labels) == bool
 
-        self.add_point(c1, label = True, arc_angle = True)
-        self.add_point(c2, label=True, arc_angle=True)
-        self.add_point(c1 * c2, label=True, arc_angle=True, color='r')
+        self.add_point(c1, label = True, impute_sqrt_label=impute_sqrt_labels, arc_angle = True)
+        self.add_point(c2, label=True, impute_sqrt_label=impute_sqrt_labels, arc_angle=True)
+        self.add_point(c1 * c2, label=True, impute_sqrt_label=impute_sqrt_labels, arc_angle=True, color='r')
 
     def set_axes(self, xmin, xmax, ymin, ymax):
         assert type(xmin) == int
@@ -106,7 +119,10 @@ class ComplexGrapher:
         for xy in zip(self.real_coords, self.imag_coords):
             axes.plot(self.real_coords[i], self.imag_coords[i], 'o', color=self.colors[i])
             if (self.labels[i]):
-                axes.annotate('  %s + %si' % xy, xy=xy, textcoords = 'data', fontsize = 10)
+                xy_label = (round(xy[0], 3), round(xy[1], 3))
+                if (self.impute_sqrts[i]):
+                    xy_label = (self.impute_sqrt_label(xy_label[0], sqrt_decimals=2, pass_thru_decimals=2), self.impute_sqrt_label(xy_label[1], sqrt_decimals=2, pass_thru_decimals=2))
+                axes.annotate('  %s + %si' % xy_label, xy=xy, textcoords = 'data', fontsize = 10)
             if (self.triangles[i]):
                 polygon = patches.Polygon(
                     [
@@ -154,3 +170,30 @@ class ComplexGrapher:
                 length_includes_head=True
             )
             i += 1
+
+        for circle_dims in self.circles:
+            circle = patches.Circle(circle_dims[1], circle_dims[0], fill=None, color='b')
+            axes.add_patch(circle)
+
+        axes.set_aspect('equal', 'datalim')
+
+
+    def impute_sqrt_label(self, x, pass_thru_decimals = 3, sqrt_decimals = 0):
+        if type(x) == int:
+            x = float(x)
+        assert type(x) == float
+        assert type(pass_thru_decimals) == int
+        assert pass_thru_decimals >= 0
+        assert type(sqrt_decimals) == int
+        assert sqrt_decimals >= 0
+
+        if round(x, pass_thru_decimals) == x:
+            return str(x)
+
+        x_sqrd = x*x
+        rounded_x_sqrd = round(x_sqrd, sqrt_decimals)
+        tolerence = pow(0.1, sqrt_decimals + 1)
+        if (math.fabs(rounded_x_sqrd - x_sqrd) < tolerence):
+            return str(r"$\sqrt{%s}$" % rounded_x_sqrd)
+
+        return str(x)
